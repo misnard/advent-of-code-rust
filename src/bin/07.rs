@@ -65,7 +65,51 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    None
+    let puzzle: Vec<Vec<&str>> = input.lines().map(|l| l.split("").collect()).collect();
+
+    let height = puzzle.len();
+    if height == 0 {
+        return Some(0);
+    }
+    let width = puzzle[0].len();
+
+    let start_col = puzzle[0].iter().position(|c| *c == "S")?;
+
+    let mut dp = vec![vec![0u64; width]; height + 1];
+
+    for col in 0..width {
+        dp[height][col] = 1;
+    }
+
+    for row in (0..height).rev() {
+        for col in 0..width {
+            let cell = puzzle[row][col];
+
+            if cell == "S" || cell == "." || cell == "" {
+                dp[row][col] = dp[row + 1][col];
+            } else if cell == "^" {
+                let mut total = 0u64;
+
+                if col == 0 {
+                    total += 1;
+                } else {
+                    total += dp[row + 1][col - 1];
+                }
+
+                if col + 1 >= width {
+                    total += 1;
+                } else {
+                    total += dp[row + 1][col + 1];
+                }
+
+                dp[row][col] = total;
+            } else {
+                dp[row][col] = dp[row + 1][col];
+            }
+        }
+    }
+
+    Some(dp[0][start_col])
 }
 
 #[cfg(test)]
